@@ -34,8 +34,13 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    return float(len(game.get_legal_moves(player)))
 
 
 def custom_score_2(game, player):
@@ -60,8 +65,15 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves - opp_moves)
 
 
 def custom_score_3(game, player):
@@ -86,8 +98,15 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    w, h = game.width / 2., game.height / 2.
+    y, x = game.get_player_location(player)
+    return float((h - y) ** 2 + (w - x) ** 2)
 
 
 class IsolationPlayer:
@@ -112,7 +131,8 @@ class IsolationPlayer:
         positive value large enough to allow the function to return before the
         timer expires.
     """
-    def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
+
+    def __init__(self, search_depth=3, score_fn=custom_score_2, timeout=10.):
         self.search_depth = search_depth
         self.score = score_fn
         self.time_left = None
@@ -209,11 +229,82 @@ class MinimaxPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        moves = self.actions(game)
+
+        v = float("-inf")
+        next_move = None
+        for move in moves:
+            res = self.result(game, move)
+            curr = self.min_value(res, depth)
+            if v < curr:
+                v = curr
+                next_move = move
+
+        if next_move is None:
+            return -1, -1
+
+        return next_move
+
+    def max_value(self, game, depth):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        if self.terminal_test(depth):
+            return self.score(game, game.active_player)
+
+        v = float("-inf")
+
+        moves = self.actions(game)
+
+        for move in moves:
+            v = max(v, self.min_value(self.result(game, move), depth - 1))
+
+        return v
+
+    def min_value(self, game, depth):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if self.terminal_test(depth):
+            return self.score(game, game.active_player)
+
+        v = float("inf")
+
+        moves = self.actions(game)
+
+        for move in moves:
+            v = min(v, self.max_value(self.result(game, move), depth - 1))
+
+        return v
+
+    @staticmethod
+    def terminal_test(depth):
+        if depth == 0:
+            return True
+        return False
+
+    @staticmethod
+    def utility(game):
+        if game.is_loser(game.active_player):
+            return float("-inf")
+
+        if game.is_winner(game.active_player):
+            return float("inf")
+
+        return float(len(game.get_legal_moves()))
+
+    @staticmethod
+    def actions(game):
+        return game.get_legal_moves()
+
+    @staticmethod
+    def result(game, move):
+        if not game.move_is_legal(move):
+            raise Exception("Illegal move")
+        return game.forecast_move(move)
 
 
 class AlphaBetaPlayer(IsolationPlayer):

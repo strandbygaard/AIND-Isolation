@@ -7,6 +7,7 @@ own agent and example heuristic functions.
 """
 
 from random import randint
+import game_agent
 
 
 def null_score(game, player):
@@ -130,7 +131,7 @@ def center_score(game, player):
 
     w, h = game.width / 2., game.height / 2.
     y, x = game.get_player_location(player)
-    return float((h - y)**2 + (w - x)**2)
+    return float((h - y) ** 2 + (w - x) ** 2)
 
 
 class RandomPlayer():
@@ -234,7 +235,7 @@ class HumanPlayer():
         if not legal_moves:
             return (-1, -1)
 
-        print(game.to_string()) #display the board for the human player
+        print(game.to_string())  # display the board for the human player
         print(('\t'.join(['[%d] %s' % (i, str(move)) for i, move in enumerate(legal_moves)])))
 
         valid_choice = False
@@ -256,7 +257,8 @@ if __name__ == "__main__":
     from isolation import Board
 
     # create an isolation board (by default 7x7)
-    player1 = RandomPlayer()
+    #player1 = RandomPlayer()
+    player1 = game_agent.MinimaxPlayer(search_depth=3)
     player2 = GreedyPlayer()
     game = Board(player1, player2)
 
@@ -268,7 +270,7 @@ if __name__ == "__main__":
     print(game.to_string())
 
     # players take turns moving on the board, so player1 should be next to move
-    assert(player1 == game.active_player)
+    assert (player1 == game.active_player)
 
     # get a list of the legal moves available to the active player
     print(game.get_legal_moves())
@@ -277,13 +279,17 @@ if __name__ == "__main__":
     # applying a move. Notice that this does NOT change the calling object
     # (unlike .apply_move()).
     new_game = game.forecast_move((1, 1))
-    assert(new_game.to_string() != game.to_string())
+    assert (new_game.to_string() != game.to_string())
     print("\nOld state:\n{}".format(game.to_string()))
     print("\nNew state:\n{}".format(new_game.to_string()))
 
     # play the remainder of the game automatically -- outcome can be "illegal
     # move", "timeout", or "forfeit"
     winner, history, outcome = game.play()
-    print("\nWinner: {}\nOutcome: {}".format(winner, outcome))
     print(game.to_string())
+    print("\nWinner: {}\nOutcome: {}".format(winner, outcome))
     print("Move history:\n{!s}".format(history))
+    if outcome == "illegal move" and not (game.is_winner(player1) or game.is_winner(player2)):
+        print("shouldn't happen!")
+
+#TODO do X iterations of game, and draw the distribution of how often our player wins
