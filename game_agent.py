@@ -232,13 +232,20 @@ class MinimaxPlayer(IsolationPlayer):
 
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-        moves = self.actions(game)
+
+        legal_moves = self.actions(game)
+
+        if not legal_moves:
+            return -1, -1
 
         v = float("-inf")
         next_move = None
-        for move in moves:
+        for move in legal_moves:
             res = self.result(game, move)
             curr = self.min_value(res, depth)
+            if curr == float("-inf"):
+                continue
+
             if v < curr:
                 v = curr
                 next_move = move
@@ -257,10 +264,12 @@ class MinimaxPlayer(IsolationPlayer):
 
         v = float("-inf")
 
-        moves = self.actions(game)
+        legal_moves = self.actions(game)
 
-        for move in moves:
-            v = max(v, self.min_value(self.result(game, move), depth - 1))
+        if not legal_moves:
+            return v
+
+        v = min([self.min_value(self.result(game, m), depth - 1) for m in legal_moves])
 
         return v
 
@@ -273,10 +282,12 @@ class MinimaxPlayer(IsolationPlayer):
 
         v = float("inf")
 
-        moves = self.actions(game)
+        legal_moves = self.actions(game)
 
-        for move in moves:
-            v = min(v, self.max_value(self.result(game, move), depth - 1))
+        if not legal_moves:
+            return v
+
+        v = min([self.max_value(self.result(game, m), depth - 1) for m in legal_moves])
 
         return v
 

@@ -195,7 +195,7 @@ class GreedyPlayer():
         """
         legal_moves = game.get_legal_moves()
         if not legal_moves:
-            return (-1, -1)
+            return -1, -1
         _, move = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
         return move
 
@@ -257,7 +257,7 @@ if __name__ == "__main__":
     from isolation import Board
 
     # create an isolation board (by default 7x7)
-    #player1 = RandomPlayer()
+    # player1 = RandomPlayer()
     player1 = game_agent.MinimaxPlayer(search_depth=3)
     player2 = GreedyPlayer()
     game = Board(player1, player2)
@@ -292,4 +292,4 @@ if __name__ == "__main__":
     if outcome == "illegal move" and not (game.is_winner(player1) or game.is_winner(player2)):
         print("shouldn't happen!")
 
-#TODO do X iterations of game, and draw the distribution of how often our player wins
+# TODO do X iterations of game, and draw the distribution of how often our player wins

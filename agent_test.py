@@ -14,7 +14,7 @@ from importlib import reload
 
 class Timer:
     def __call__(self):
-        return 100
+        return 1000
 
 
 class IsolationTest(unittest.TestCase):
@@ -26,11 +26,12 @@ class IsolationTest(unittest.TestCase):
         self.player2 = "Player2"
         self.game = isolation.Board(self.player1, self.player2)
 
+    #@unittest.skip("")
     def testMiniMax(self):
         minimaxPlayer = game_agent.MinimaxPlayer(search_depth=3)
         minimaxPlayer.time_left = Timer()
         self.game.apply_move((0, 0))
-        self.game.apply_move((6, 6))
+        self.game.apply_move((5, 5))
 
         time_millis = lambda: 1000 * timeit.default_timer()
         get_move_start = time_millis()
