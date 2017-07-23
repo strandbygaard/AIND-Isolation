@@ -238,29 +238,20 @@ class MinimaxPlayer(IsolationPlayer):
         if not legal_moves:
             return -1, -1
 
-        v = float("-inf")
-        next_move = None
-        for move in legal_moves:
-            res = self.result(game, move)
-            curr = self.min_value(res, depth)
-            if curr == float("-inf"):
-                continue
+        player = game.active_player
+        _, move = max([(self.min_value(self.result(game, m), player, depth - 1), m) for m in legal_moves])
 
-            if v < curr:
-                v = curr
-                next_move = move
-
-        if next_move is None:
+        if move is None:
             return -1, -1
 
-        return next_move
+        return move
 
-    def max_value(self, game, depth):
+    def max_value(self, game, player, depth):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
         if self.terminal_test(depth):
-            return self.score(game, game.active_player)
+            return self.utility(game, player)
 
         v = float("-inf")
 
@@ -269,16 +260,16 @@ class MinimaxPlayer(IsolationPlayer):
         if not legal_moves:
             return v
 
-        v = min([self.min_value(self.result(game, m), depth - 1) for m in legal_moves])
+        v = max([self.min_value(self.result(game, m), player, depth - 1) for m in legal_moves])
 
         return v
 
-    def min_value(self, game, depth):
+    def min_value(self, game, player, depth):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
         if self.terminal_test(depth):
-            return self.score(game, game.active_player)
+            return self.utility(game, player)
 
         v = float("inf")
 
@@ -287,7 +278,7 @@ class MinimaxPlayer(IsolationPlayer):
         if not legal_moves:
             return v
 
-        v = min([self.max_value(self.result(game, m), depth - 1) for m in legal_moves])
+        v = min([self.max_value(self.result(game, m), player, depth - 1) for m in legal_moves])
 
         return v
 
@@ -297,15 +288,14 @@ class MinimaxPlayer(IsolationPlayer):
             return True
         return False
 
-    @staticmethod
-    def utility(game):
-        if game.is_loser(game.active_player):
+    def utility(self, game, player):
+        if game.is_loser(player):
             return float("-inf")
 
-        if game.is_winner(game.active_player):
+        if game.is_winner(player):
             return float("inf")
 
-        return float(len(game.get_legal_moves()))
+        return self.score(game, player)
 
     @staticmethod
     def actions(game):
