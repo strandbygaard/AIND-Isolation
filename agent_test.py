@@ -26,7 +26,7 @@ class IsolationTest(unittest.TestCase):
         self.player2 = "Player2"
         self.game = isolation.Board(self.player1, self.player2)
 
-    #@unittest.skip("")
+    @unittest.skip("")
     def testMiniMax(self):
         minimaxPlayer = game_agent.MinimaxPlayer(search_depth=3)
         minimaxPlayer.time_left = Timer()
@@ -36,6 +36,20 @@ class IsolationTest(unittest.TestCase):
         time_millis = lambda: 1000 * timeit.default_timer()
         get_move_start = time_millis()
         move = minimaxPlayer.get_move(self.game, Timer())
+        get_move_end = time_millis()
+        print(self.game.to_string())
+
+        print("Elapsed: " + str(get_move_end - get_move_start))
+
+    def testAlphaBeta(self):
+        alpha_beta_player = game_agent.AlphaBetaPlayer(search_depth=3)
+        alpha_beta_player.time_left = Timer()
+        self.game.apply_move((0, 0))
+        self.game.apply_move((5, 5))
+
+        time_millis = lambda: 1000 * timeit.default_timer()
+        get_move_start = time_millis()
+        move = alpha_beta_player.get_move(self.game, Timer())
         get_move_end = time_millis()
         print(self.game.to_string())
 

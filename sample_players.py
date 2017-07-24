@@ -258,7 +258,7 @@ if __name__ == "__main__":
 
     # create an isolation board (by default 7x7)
     # player1 = RandomPlayer()
-    player1 = game_agent.MinimaxPlayer(search_depth=3)
+    player1 = game_agent.AlphaBetaPlayer(search_depth=3)
     player2 = GreedyPlayer()
     game = Board(player1, player2)
 
