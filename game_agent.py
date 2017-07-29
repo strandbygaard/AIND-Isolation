@@ -356,7 +356,6 @@ class AlphaBetaPlayer(IsolationPlayer):
             while True:
                 best_move = self.alphabeta(game, i)
                 i = i+1
-                print("i: ", i)
         except SearchTimeout:
             pass  # Handle any actions required after timeout as needed
 
