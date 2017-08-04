@@ -2,7 +2,7 @@
 test your agent's strength against a set of known agents using tournament.py
 and include the results in your report.
 """
-import random
+import math
 
 
 class SearchTimeout(Exception):
@@ -40,7 +40,20 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    return float(len(game.get_legal_moves(player)))
+    my = len(game.get_legal_moves(player))
+    other = len(game.get_legal_moves(game.get_opponent(player)))
+
+    if my != other:
+        return float(my - other)
+
+    y_cen, x_cen = int(game.height / 2), int(game.width / 2)
+    y_my, x_my = game.get_player_location(player)
+    y_other, x_other = game.get_player_location(game.get_opponent(player))
+    my_dist = math.sqrt((y_my - y_cen) ** 2 + (x_my - x_cen) ** 2)
+    other_dist = math.sqrt((y_other - y_cen) ** 2 + (x_other - x_cen) ** 2)
+    return float(other_dist - my_dist) / 10.
+
+    # return math.log10(abs(float(my - other)) + 1)
 
 
 def custom_score_2(game, player):
@@ -71,9 +84,8 @@ def custom_score_2(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - opp_moves)
+    # This is the simple heuristic discussed in the lectures, where the score is just the number of moves available
+    return float(len(game.get_legal_moves(player)))
 
 
 def custom_score_3(game, player):
@@ -104,9 +116,12 @@ def custom_score_3(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    w, h = game.width / 2., game.height / 2.
-    y, x = game.get_player_location(player)
-    return float((h - y) ** 2 + (w - x) ** 2)
+    # This is the improved heuristic from the lectures, where the score is the diff between my moves,
+    # and the opponents moves
+    my = len(game.get_legal_moves(player))
+    other = len(game.get_legal_moves(game.get_opponent(player)))
+
+    return float(my - other)
 
 
 class IsolationPlayer:
@@ -233,7 +248,8 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        legal_moves = self.actions(game)
+        # Actions
+        legal_moves = game.get_legal_moves()
 
         if not legal_moves:
             return -1, -1
@@ -250,12 +266,13 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if self.terminal_test(depth):
+        if depth == 0:
             return self.utility(game, player)
 
         v = float("-inf")
 
-        legal_moves = self.actions(game)
+        # Actions
+        legal_moves = game.get_legal_moves()
 
         if not legal_moves:
             return v
@@ -268,12 +285,13 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if self.terminal_test(depth):
+        if depth == 0:
             return self.utility(game, player)
 
         v = float("inf")
 
-        legal_moves = self.actions(game)
+        # Actions
+        legal_moves = game.get_legal_moves()
 
         if not legal_moves:
             return v
@@ -281,12 +299,6 @@ class MinimaxPlayer(IsolationPlayer):
         v = min([self.max_value(self.result(game, m), player, depth - 1) for m in legal_moves])
 
         return v
-
-    @staticmethod
-    def terminal_test(depth):
-        if depth == 0:
-            return True
-        return False
 
     def utility(self, game, player):
         if game.is_loser(player):
@@ -296,10 +308,6 @@ class MinimaxPlayer(IsolationPlayer):
             return float("inf")
 
         return self.score(game, player)
-
-    @staticmethod
-    def actions(game):
-        return game.get_legal_moves()
 
     @staticmethod
     def result(game, move):
@@ -355,7 +363,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             i = 1
             while True:
                 best_move = self.alphabeta(game, i)
-                i = i+1
+                i = i + 1
         except SearchTimeout:
             pass  # Handle any actions required after timeout as needed
 
@@ -414,7 +422,8 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         v = float("-inf")
 
-        legal_moves = self.actions(game)
+        # Actions
+        legal_moves = game.get_legal_moves()
 
         next_move = -1, -1
         if not legal_moves:
@@ -435,12 +444,14 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if self.terminal_test(depth):
+        # Terminal test
+        if depth == 0:
             return self.utility(game, player)
 
         v = float("-inf")
 
-        legal_moves = self.actions(game)
+        # Actions
+        legal_moves = game.get_legal_moves()
 
         if not legal_moves:
             return v
@@ -456,12 +467,14 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if self.terminal_test(depth):
+        # Terminal test
+        if depth == 0:
             return self.utility(game, player)
 
         v = float("inf")
 
-        legal_moves = self.actions(game)
+        # Actions
+        legal_moves = game.get_legal_moves()
 
         if not legal_moves:
             return v
@@ -474,13 +487,10 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         return v
 
-    @staticmethod
-    def terminal_test(depth):
-        if depth == 0:
-            return True
-        return False
-
     def utility(self, game, player):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
         if game.is_loser(player):
             return float("-inf")
 
@@ -488,10 +498,6 @@ class AlphaBetaPlayer(IsolationPlayer):
             return float("inf")
 
         return self.score(game, player)
-
-    @staticmethod
-    def actions(game):
-        return game.get_legal_moves()
 
     @staticmethod
     def result(game, move):
