@@ -17,6 +17,12 @@ Results of the tournament were as follows:
            Win Rate:      68.6%        64.3%        55.7%        60.0%  
 ```
 
+The best evaluation function to use is custom score heuristic 1. The reasons why this is the best of the three evaluation functions are:
+
+1. It is consistently the function that has the highest win rate of the three implemented functions.
+2. It addresses an obvious limitation of custom score heuristic 3, by being able to provide a positive or negative score, even if the available moves count of both players is the same.
+3. It is easy to explain and understand its behavior. The other two custom heuristics are simpler, but are also have a lower win rate. It's makes analysis of the programme much simpler, if the scoring function is simple, and easily understood.    
+
 ## Custom Score Heuristic 1
 This heuristic is an extension of the heuristic covered in the lectures, where the score is proportional to the difference between the number of moves available to the current player and the opponent. 
 
